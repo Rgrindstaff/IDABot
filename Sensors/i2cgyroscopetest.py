@@ -1,22 +1,11 @@
 import smbus
 import math
+from LSM9DS1 import *
 
-#Set Addresses
+#Misc Values
 
-IMU=0x6b
-WHO_I_AM=0x0f
-CTRL_REG1=0x10
-CTRL_REG4=0x1e
-
-GXL=0x18
-GXH=0x19
-GYL=0x1a
-GYH=0x1b
-GZL=0x1c
-GZH=0x1d
 GSEN=0.07
 GRES=(245.0/32768.0)
-
 
 
 #Set I2C Bus
@@ -24,13 +13,13 @@ GRES=(245.0/32768.0)
 i2c=smbus.SMBus(1)
 
 #Control Registers
-i2c.write_byte_data(IMU,CTRL_REG1,0b00100000)
-i2c.write_byte_data(IMU,CTRL_REG4,0b00111000)
+i2c.write_byte_data(GYR_ADD,CTRL_REG1,0b00100000)
+i2c.write_byte_data(GYR_ADD,CTRL_REG4,0b00111000)
 
 #Grab X Data
 
-XLow=i2c.read_byte_data(IMU,GXL)
-XHigh=i2c.read_byte_data(IMU,GXH)
+XLow=i2c.read_byte_data(GYR_ADD,GYR_X_L)
+XHigh=i2c.read_byte_data(GYR_ADD,GYR_X_H)
 X=(XLow)|(XHigh<<8)
 if X >= 32768:
     X-=65536
@@ -39,8 +28,8 @@ print ("X: ") + str(X)
 
 #Grab Y Data
 
-YLow=i2c.read_byte_data(IMU,GYL)
-YHigh=i2c.read_byte_data(IMU,GYH)
+YLow=i2c.read_byte_data(GYR_ADD,GYR_Y_L)
+YHigh=i2c.read_byte_data(GYR_ADD,GYR_Z_H)
 Y=(YLow)|(YHigh<<8)
 if Y >= 32768:
     Y-=65536
@@ -49,8 +38,8 @@ print ("Y: ") + str(Y)
 
 #Grab Z Data
 
-ZLow=i2c.read_byte_data(IMU,GZL)
-ZHigh=i2c.read_byte_data(IMU,GZH)
+ZLow=i2c.read_byte_data(GYR_ADD,GYR_Z_L)
+ZHigh=i2c.read_byte_data(GYR_ADD,GYR_Z_H)
 Z=(ZLow)|(ZHigh<<8)
 if Z >= 32768:
     Z-=65536
