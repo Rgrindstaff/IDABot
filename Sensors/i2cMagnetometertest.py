@@ -6,6 +6,7 @@ from LSM9DS1 import *
 
 PI=3.1415926
 RadToDeg=180/PI
+Declination=13
 
 #Functions
 
@@ -90,6 +91,7 @@ else:
 mean=total/i
 if mean <0:
     mean+=360
+mean-=Declination
 print ("Mean Heading: ") + str(mean)
 print ("Max Heading: ") + str(maximum)
 print ("Min Heading: ") + str(minimum)
