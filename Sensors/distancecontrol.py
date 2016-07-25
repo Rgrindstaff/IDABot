@@ -1,6 +1,8 @@
 import smbus
 import math
 import time
+#import serial
+#ser = serial.Serial('/dev/ttyS0', 115200)
 from LSM9DS1 import *
 import IMUFunctions as func
 
@@ -13,6 +15,7 @@ kp=1
 ki=1
 kd=1
 dt=.1
+maxspeed=500
 
 #Set Bus
 
@@ -20,28 +23,19 @@ i2c=smbus.SMBus(1)
 
 #Functions
 
-def updatePID(current,target,dt):
-    pidError=target-current
-    if pidError>10000:
-        pidOutput=0
-    else:
-        pidOutput=(10000-pidError)/20
+def goToEncoderPosition(position):
+    ser.write('!R')
+    ser.write('\r')
+    ser.write('!PR')
+    ser.write(' ')
+    ser.write('1')
+    ser.write(' ')
+    ser.write('%d' %(position))
 
-    time.sleep(dt)
-
-    return pidOutput
-
-def getEncoder():
-    return encoderData
-
-#Main
-
-target=1000000000
-
-
-while (1):
-    current=getEncoder()
-    output=updatePID(current,target,dt)
-    speed-=output
-    if speed<0:
-        speed=0
+    ser.write('!R')
+    ser.write('\r')
+    ser.write('!PR')
+    ser.write(' ')
+    ser.write('2')
+    ser.write(' ')
+    ser.write('%d' %(-position))
