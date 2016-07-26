@@ -1,8 +1,8 @@
 import smbus
 import math
 import time
-#import serial
-#ser = serial.Serial('/dev/ttyS0', 115200)
+import serial
+ser = serial.Serial('/dev/ttyS0', 115200)
 from LSM9DS1 import *
 import IMUFunctions as func
 
@@ -11,9 +11,9 @@ import IMUFunctions as func
 PI=3.1415926
 RadToDeg=180/PI
 Declination=13
-kp=1
-ki=1
-kd=1
+kp=20
+ki=20
+kd=10.5
 dt=.1
 speed1=500.0
 speed2=500.0
@@ -31,12 +31,6 @@ def updatePID(current,target,dt):
     if pidError>270:
         pidError-=360
 
-    #steadyError+=pidError*dt
-    #if steadyError<-10.0:
-    #    steadyError=-10.0
-    #if steadyError>10.0:
-    #    steadyError=10.0
-
     P=kp*pidError
     I=ki*pidError
     D=kd*pidError
@@ -45,10 +39,10 @@ def updatePID(current,target,dt):
 
     pidOutput=P+I+D
 
-    #if pidOutput<-0.1:
-    #    pidOutput=-0.1
-    #if pidOutput>0.1:
-    #    pidOutput=0.1
+    if pidOutput<-100:
+        pidOutput=-100
+    if pidOutput>100:
+        pidOutput=100
 
     time.sleep(dt)
 
@@ -57,30 +51,28 @@ def updatePID(current,target,dt):
 def getHeading():
     x=func.MAGX()
     y=func.MAGY()
-    heading=func.getHeading(x,y)
+    heading=func.getHeading(x,y)-declination
     return heading
 
-##def setMotorSpeed(speed1,speed2):
-##    ser.write('!G')
-##    ser.write(' ')
-##    ser.write('1')
-##    ser.write(' ')
-##    ser.write('%d' %(speed1))
-##    ser.write('\r')
-##
-##    ser.write('!G')
-##    ser.write(' ')
-##    ser.write('2')
-##    ser.write(' ')
-##    ser.write('%d' %(-speed2))
-##    ser.write('\r')
+def setMotorSpeed(speed1,speed2):
+    ser.write('!G')
+    ser.write(' ')
+    ser.write('1')
+    ser.write(' ')
+    ser.write('%d' %(speed1))
+    ser.write('\r')
+
+    ser.write('!G')
+    ser.write(' ')
+    ser.write('2')
+    ser.write(' ')
+    ser.write('%d' %(-speed2))
+    ser.write('\r')
 
 #main
 
-initHeading=getHeading()
-target=0#initHeading-180
-#if target<-180:
-#    target +=360
+target=getHeading()
+
 while (1):
     heading=getHeading()
     output=updatePID(heading,target,dt)
@@ -94,7 +86,7 @@ while (1):
         speed2=700.0
     if speed2 < -700.0:
         speed2=-700.0
-    #setMotorSpeed(speed1,speed2)
+    setMotorSpeed(speed1,speed2)
     print ("heading: ") + str(heading)
     print ("speed1: ") + str(speed1)
     print ("speed2: ") + str(speed2)
