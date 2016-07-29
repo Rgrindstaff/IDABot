@@ -156,6 +156,7 @@ def GetBatteryAmps():
 def GetAbsoluteEncoder(MotorNumber):
     ser.write('?C')
     ser.write('%d' %(MotorNumber))
+    ser.write('\r')
     EA = ser.readline(18)
     print str(EA)
     
